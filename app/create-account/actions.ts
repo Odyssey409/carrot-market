@@ -2,12 +2,36 @@
 
 import { z } from "zod";
 
-const formSchema = z.object({
-  username: z.string().min(3).max(10),
-  email: z.string().email(),
-  password: z.string().min(10),
-  confirm_password: z.string().min(10),
-});
+function checkUsername(username: string) {
+  return !username.includes("admin");
+}
+
+const checkPasswords = ({
+  password,
+  confirm_password,
+}: {
+  password: string;
+  confirm_password: string;
+}) => password === confirm_password;
+
+const formSchema = z
+  .object({
+    username: z
+      .string({
+        invalid_type_error: "Username must be a string",
+        required_error: "Username is required",
+      })
+      .min(3, "Way too short!!")
+      .max(10, " Way too long!!")
+      .refine(checkUsername, "Username cannot contain 'admin'"),
+    email: z.string().email(),
+    password: z.string().min(10),
+    confirm_password: z.string().min(10),
+  }) //아래의 refine은 form 전체에 대한 refine임을 주의 confirm_password에 붙은 게 아님
+  .refine(checkPasswords, {
+    message: "Passwords do not match",
+    path: ["confirm_password"],
+  });
 
 export async function createAccount(prevState: any, formData: FormData) {
   const data = {
