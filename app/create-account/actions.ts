@@ -6,6 +6,10 @@ function checkUsername(username: string) {
   return !username.includes("admin");
 }
 
+const passwordRegex = new RegExp(
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#?!@$%^&*-]).+$/
+);
+
 const checkPasswords = ({
   password,
   confirm_password,
@@ -23,9 +27,18 @@ const formSchema = z
       })
       .min(3, "Way too short!!")
       .max(10, " Way too long!!")
+      .toLowerCase()
+      .trim()
+      .transform((username) => `${username}🇰🇷`)
       .refine(checkUsername, "Username cannot contain 'admin'"),
     email: z.string().email(),
-    password: z.string().min(10),
+    password: z
+      .string()
+      .min(10)
+      .regex(
+        passwordRegex,
+        "Password too weak, must contain at least one uppercase letter, one lowercase letter, and one special character"
+      ),
     confirm_password: z.string().min(10),
   }) //아래의 refine은 form 전체에 대한 refine임을 주의 confirm_password에 붙은 게 아님
   .refine(checkPasswords, {
