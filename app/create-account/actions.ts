@@ -1,14 +1,15 @@
 "use server";
 
+import {
+  PASSWORD_MIN_LENGTH,
+  PASSWORD_REGEX,
+  PASSWORD_REGEX_ERROR,
+} from "@/lib/constants";
 import { z } from "zod";
 
 function checkUsername(username: string) {
   return !username.includes("admin");
 }
-
-const passwordRegex = new RegExp(
-  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[#?!@$%^&*-]).+$/
-);
 
 const checkPasswords = ({
   password,
@@ -25,8 +26,7 @@ const formSchema = z
         invalid_type_error: "Username must be a string",
         required_error: "Username is required",
       })
-      .min(3, "Way too short!!")
-      .max(10, " Way too long!!")
+
       .toLowerCase()
       .trim()
       .transform((username) => `${username}🇰🇷`)
@@ -34,12 +34,9 @@ const formSchema = z
     email: z.string().email(),
     password: z
       .string()
-      .min(10)
-      .regex(
-        passwordRegex,
-        "Password too weak, must contain at least one uppercase letter, one lowercase letter, and one special character"
-      ),
-    confirm_password: z.string().min(10),
+      .min(PASSWORD_MIN_LENGTH)
+      .regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
+    confirm_password: z.string().min(PASSWORD_MIN_LENGTH),
   }) //아래의 refine은 form 전체에 대한 refine임을 주의 confirm_password에 붙은 게 아님
   .refine(checkPasswords, {
     message: "Passwords do not match",
