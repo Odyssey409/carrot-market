@@ -5,6 +5,7 @@ import {
   PASSWORD_REGEX,
   PASSWORD_REGEX_ERROR,
 } from "@/lib/constants";
+import db from "@/lib/db";
 import { z } from "zod";
 
 function checkUsername(username: string) {
@@ -19,6 +20,30 @@ const checkPasswords = ({
   confirm_password: string;
 }) => password === confirm_password;
 
+const checkUniqueUsername = async (username: string) => {
+  const user = await db.user.findUnique({
+    where: {
+      username,
+    },
+    select: {
+      id: true,
+    },
+  });
+  return !Boolean(user);
+};
+
+const checkUniqueEmail = async (email: string) => {
+  const user = await db.user.findUnique({
+    where: {
+      email,
+    },
+    select: {
+      id: true,
+    },
+  });
+  return !Boolean(user);
+};
+
 const formSchema = z
   .object({
     username: z
@@ -29,13 +54,19 @@ const formSchema = z
 
       .toLowerCase()
       .trim()
-      .transform((username) => `${username}🇰🇷`)
-      .refine(checkUsername, "Username cannot contain 'admin'"),
-    email: z.string().email(),
-    password: z
+      //.transform((username) => `${username}🇰🇷`)
+      .refine(checkUsername, "Username cannot contain 'admin'")
+      .refine(checkUniqueUsername, "This username is already taken"),
+    email: z
       .string()
-      .min(PASSWORD_MIN_LENGTH)
-      .regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
+      .email()
+      .toLowerCase()
+      .refine(
+        checkUniqueEmail,
+        "This account already registered with this email"
+      ),
+    password: z.string().min(PASSWORD_MIN_LENGTH),
+    //.regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
     confirm_password: z.string().min(PASSWORD_MIN_LENGTH),
   }) //아래의 refine은 form 전체에 대한 refine임을 주의 confirm_password에 붙은 게 아님
   .refine(checkPasswords, {
@@ -43,16 +74,21 @@ const formSchema = z
     path: ["confirm_password"],
   });
 
-export async function createAccount(prevState: any, formData: FormData) {
+export async function createAccount(prevState: unknown, formData: FormData) {
   const data = {
     username: formData.get("username"),
     email: formData.get("email"),
     password: formData.get("password"),
     confirm_password: formData.get("confirm_password"),
   };
-  const result = formSchema.safeParse(data);
+  const result = await formSchema.safeParseAsync(data);
 
   if (!result.success) {
     return result.error.flatten();
+  } else {
+    //hash password
+    //save user to db
+    //login user
+    // redirect to home page
   }
 }
