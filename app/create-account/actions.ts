@@ -8,9 +8,8 @@ import {
 import db from "@/lib/db";
 import { z } from "zod";
 import bcrypt from "bcrypt";
-import { getIronSession } from "iron-session";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { getSession } from "@/lib/session";
 
 function checkUsername(username: string) {
   return !username.includes("admin");
@@ -104,15 +103,10 @@ export async function createAccount(prevState: unknown, formData: FormData) {
         id: true,
       },
     });
-    console.log(user);
-    //login user
-    const cookie = await getIronSession(cookies(), {
-      cookieName: "carrot-session",
-      password: process.env.COOKIE_PASSWORD!,
-    });
-    //@ts-expect-error 타입 정의 안되어있음
-    cookie.userId = user.id;
-    await cookie.save();
+
+    const session = await getSession();
+    session.userId = user.id;
+    await session.save();
     redirect("/profile");
   }
 }
