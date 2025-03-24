@@ -8,6 +8,9 @@ import {
 import db from "@/lib/db";
 import { z } from "zod";
 import bcrypt from "bcrypt";
+import { getIronSession } from "iron-session";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
 function checkUsername(username: string) {
   return !username.includes("admin");
@@ -66,8 +69,10 @@ const formSchema = z
         checkUniqueEmail,
         "This account already registered with this email"
       ),
-    password: z.string().min(PASSWORD_MIN_LENGTH),
-    //.regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
+    password: z
+      .string()
+      .min(PASSWORD_MIN_LENGTH)
+      .regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
     confirm_password: z.string().min(PASSWORD_MIN_LENGTH),
   }) //아래의 refine은 form 전체에 대한 refine임을 주의 confirm_password에 붙은 게 아님
   .refine(checkPasswords, {
@@ -101,6 +106,13 @@ export async function createAccount(prevState: unknown, formData: FormData) {
     });
     console.log(user);
     //login user
-    // redirect to home page
+    const cookie = await getIronSession(cookies(), {
+      cookieName: "carrot-session",
+      password: process.env.COOKIE_PASSWORD!,
+    });
+    //@ts-expect-error 타입 정의 안되어있음
+    cookie.userId = user.id;
+    await cookie.save();
+    redirect("/profile");
   }
 }
