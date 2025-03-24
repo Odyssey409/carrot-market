@@ -10,6 +10,7 @@ import { z } from "zod";
 import bcrypt from "bcrypt";
 import { getSession } from "@/lib/session";
 import { redirect } from "next/navigation";
+
 const checkEmailExists = async (email: string) => {
   const user = await db.user.findUnique({
     where: { email },
@@ -25,11 +26,12 @@ const formSchema = z.object({
     .string()
     .email()
     .refine(checkEmailExists, "An account doesn't exist with this email."),
-  password: z.string({
-    required_error: "Password is required",
-  }),
-  //.min(PASSWORD_MIN_LENGTH)
-  //.regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
+  password: z
+    .string({
+      required_error: "Password is required",
+    })
+    .min(PASSWORD_MIN_LENGTH)
+    .regex(PASSWORD_REGEX, PASSWORD_REGEX_ERROR),
 });
 
 export const login = async (prevState: unknown, formData: FormData) => {
