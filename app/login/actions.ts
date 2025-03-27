@@ -60,6 +60,7 @@ export const login = async (prevState: unknown, formData: FormData) => {
     if (passwordMatch) {
       const session = await getSession();
       session.userId = user!.id;
+      await session.save();
       redirect("/profile");
     } else {
       return {
