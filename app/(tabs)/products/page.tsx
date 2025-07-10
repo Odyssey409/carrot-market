@@ -13,7 +13,7 @@ async function getInitialProducts() {
     },
     take: 1,
     orderBy: {
-      created_at: "asc", // 내림차순 정렬
+      created_at: "desc", // 최신순 정렬
     },
   });
   return products;

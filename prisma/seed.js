@@ -3,7 +3,7 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 (async () => {
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 9; i++) {
     await prisma.product.create({
       data: {
         price: +faker.commerce.price({ min: 10000, max: 1000000 }),
