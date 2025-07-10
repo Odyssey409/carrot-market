@@ -11,10 +11,10 @@ export async function getMoreProducts(page: number) {
       photo: true,
       id: true,
     },
-    skip: 1,
+    skip: page * 1,
     take: 1,
     orderBy: {
-      created_at: "asc", // 내림차순 정렬
+      created_at: "desc", // 최신순 정렬
     },
   });
   return products;

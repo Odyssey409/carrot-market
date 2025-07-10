@@ -5,8 +5,10 @@ const nextConfig = {
       {
         hostname: "avatars.githubusercontent.com",
       },
+      {
+        hostname: "picsum.photos",
+      },
     ],
-    domains: ["picsum.photos"],
   },
 };
 

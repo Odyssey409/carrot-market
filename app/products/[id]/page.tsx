@@ -56,7 +56,7 @@ export default async function ProductDetail({
   };
   return (
     <div>
-      <div className="relative aspect-square">
+      <div className="relative aspect-square ">
         <Image
           fill
           src={product.photo}
