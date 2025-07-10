@@ -6,6 +6,7 @@ const nextConfig = {
         hostname: "avatars.githubusercontent.com",
       },
     ],
+    domains: ["picsum.photos"],
   },
 };
 
